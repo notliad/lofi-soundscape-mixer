@@ -1,15 +1,22 @@
 
 import React, { useEffect, useState } from 'react';
-import { Play, Pause, SkipForward, SkipBack, ExternalLink, Headphones, Smile } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, ExternalLink, Headphones, Smile, Link, Plus, Save, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from "next-themes";
 import VolumeControl from './VolumeControl';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { defaultStation, RadioStation, radioStations } from '@/data/radioStations';
+import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 
 interface RadioPlayerProps {
   className?: string;
 }
+
+const SAVED_STATIONS_KEY = 'lofi-soundscape-saved-stations';
 
 const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   const [currentStation, setCurrentStation] = useState<RadioStation>(defaultStation);
@@ -17,7 +24,14 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   const [volume, setVolume] = useState(0.7);
   const [videoElement, setVideoElement] = useState<HTMLIFrameElement | null>(null);
   const [showStationGrid, setShowStationGrid] = useState(false);
+  const [customUrl, setCustomUrl] = useState('');
+  const [customTitle, setCustomTitle] = useState('');
+  const [customUrlError, setCustomUrlError] = useState('');
+  const [isCustomStation, setIsCustomStation] = useState(false);
+  const [savedStations, setSavedStations] = useState<RadioStation[]>([]);
+  const [showSavedStations, setShowSavedStations] = useState(false);
   const { theme } = useTheme();
+  const { toast } = useToast();
 
   const togglePlay = () => {
     if (!videoElement) return;
@@ -38,6 +52,17 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
     const iframe = document.getElementById('youtube-iframe') as HTMLIFrameElement;
     setVideoElement(iframe);
 
+    // Load saved stations from localStorage
+    const savedStationsJson = localStorage.getItem(SAVED_STATIONS_KEY);
+    if (savedStationsJson) {
+      try {
+        const parsedStations = JSON.parse(savedStationsJson) as RadioStation[];
+        setSavedStations(parsedStations);
+      } catch (error) {
+        console.error('Error parsing saved stations:', error);
+      }
+    }
+
     return () => {
       // Cleanup
       if (iframe) {
@@ -48,9 +73,84 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
 
   const changeStation = (station: RadioStation) => {
     setCurrentStation(station);
+    setIsCustomStation(false);
     
     if (isPlaying && videoElement) {
       videoElement.src = `${station.streamUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0`;
+    }
+  };
+
+  const handleCustomUrlSubmit = () => {
+    // Basic validation for YouTube URL
+    if (!customUrl.trim()) {
+      setCustomUrlError('Please enter a URL');
+      return;
+    }
+    
+    // Check for valid YouTube URL formats
+    const isYoutubeUrl = customUrl.includes('youtube.com/watch?v=');
+    const isYoutubeShortUrl = customUrl.includes('youtu.be/');
+    
+    if (!isYoutubeUrl && !isYoutubeShortUrl) {
+      setCustomUrlError('Please enter a valid YouTube URL');
+      return;
+    }
+    
+    setCustomUrlError('');
+    
+    // Process the URL to ensure it works with the embed format
+    let processedUrl = customUrl;
+    
+    // Handle youtu.be short links
+    if (isYoutubeShortUrl) {
+      const videoId = customUrl.split('youtu.be/')[1]?.split('?')[0];
+      if (videoId) {
+        processedUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      }
+    }
+    
+    // Use provided title or default
+    const stationTitle = customTitle.trim() || 'Custom Stream';
+    
+    // Create a unique ID for the custom station
+    const customId = `custom-${Date.now()}`;
+    
+    // Create a custom station object
+    const customStation: RadioStation = {
+      id: customId,
+      name: stationTitle,
+      description: 'Your custom YouTube stream',
+      thumbnailUrl: 'https://i.ibb.co/G0VWw9t/lofi-girl.jpg', // Default thumbnail
+      streamUrl: processedUrl,
+      isCustom: true
+    };
+    
+    setCurrentStation(customStation);
+    setIsCustomStation(true);
+    
+    // Save to localStorage
+    const updatedSavedStations = [...savedStations, customStation];
+    setSavedStations(updatedSavedStations);
+    localStorage.setItem(SAVED_STATIONS_KEY, JSON.stringify(updatedSavedStations));
+    
+    if (isPlaying && videoElement) {
+      videoElement.src = `${processedUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0`;
+    }
+    
+    // Show success toast and close dialog
+    toast({
+      title: "Custom stream saved",
+      description: `Your stream "${stationTitle}" has been saved and is ready to play`,
+    });
+    
+    // Reset the custom fields
+    setCustomUrl('');
+    setCustomTitle('');
+    
+    // Close the dialog by simulating a click on the close button
+    const closeButton = document.getElementById('closeDialog') as HTMLElement;
+    if (closeButton) {
+      closeButton.click();
     }
   };
 
@@ -65,11 +165,27 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
     const prevIndex = (currentIndex - 1 + radioStations.length) % radioStations.length;
     changeStation(radioStations[prevIndex]);
   };
+  
+  const deleteCustomStation = (stationId: string) => {
+    const updatedStations = savedStations.filter(station => station.id !== stationId);
+    setSavedStations(updatedStations);
+    localStorage.setItem(SAVED_STATIONS_KEY, JSON.stringify(updatedStations));
+    
+    // If the current station is being deleted, switch to default
+    if (currentStation.id === stationId) {
+      changeStation(defaultStation);
+    }
+    
+    toast({
+      title: "Station removed",
+      description: "The custom station has been removed from your saved stations",
+    });
+  };
 
   return (
     <div className={cn(`${theme === 'dark' ? 'glass-panel-dark' : 'glass-panel'} transition-all duration-300 delay-100 rounded-2xl p-6 backdrop-blur-md relative`, className)}>
       {/* Friendly welcome/description */}
-      <div className="absolute top-2 right-2 flex items-center gap-2 text-muted-foreground">
+      <div className="absolute top-3 right-4 flex items-center gap-2 text-muted-foreground">
         <Smile className="w-4 h-4 text-yellow-500" />
         <span className="text-xs">Relax & study</span>
       </div>
@@ -217,17 +333,85 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
           
         </div>
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-medium flex items-center gap-2">
-            <Headphones className="w-5 h-5 text-primary/70" />
-            <button 
-            onClick={() => setShowStationGrid(!showStationGrid)}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {showStationGrid ? 'Hide Stations' : 'Show All Stations'}
-          </button>
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-medium flex items-center gap-2">
+              <Headphones className="w-5 h-5 text-primary/70" />
+              <button 
+                onClick={() => setShowStationGrid(!showStationGrid)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showStationGrid ? 'Hide Default Stations' : 'Show Default Stations'}
+              </button>
+            </h2>
+            
+            {savedStations.length > 0 && (
+              <button 
+                onClick={() => setShowSavedStations(!showSavedStations)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <Save size={14} />
+                {showSavedStations ? 'Hide Saved Stations' : 'Show Saved Stations'}
+              </button>
+            )}
+          </div>
+          
+          <Dialog>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <Plus size={16} />
+                      <span className="hidden sm:inline">Add Station</span>
+                    </Button>
+                  </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Add custom YouTube stream</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Custom YouTube Stream</DialogTitle>
+              </DialogHeader>
+              <div className="py-4 space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Enter a YouTube URL and title to save as a custom radio station.
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="custom-title">Station Title</Label>
+                  <Input
+                    id="custom-title"
+                    placeholder="My Favorite Lofi Mix"
+                    value={customTitle}
+                    onChange={(e) => setCustomTitle(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="custom-url">YouTube URL</Label>
+                  <Input
+                    id="custom-url"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={customUrl}
+                    onChange={(e) => setCustomUrl(e.target.value)}
+                  />
+                  {customUrlError && (
+                    <p className="text-sm text-destructive">{customUrlError}</p>
+                  )}
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button id='closeDialog' variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button onClick={handleCustomUrlSubmit}>Save Station</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
-        {/* Station Grid */}
+        {/* Default Station Grid */}
         {showStationGrid && (
           <div className="animate-fade-in">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-2">
@@ -255,6 +439,68 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
                     <div className="text-xs text-muted-foreground">{station.description}</div>
                   </div>
                 </button>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Saved Custom Stations */}
+        {showSavedStations && savedStations.length > 0 && (
+          <div className="animate-fade-in mt-4">
+            <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
+              <Save size={14} className="text-primary/70" />
+              Your Saved Stations
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-2">
+              {savedStations.map(station => (
+                <div
+                  key={station.id}
+                  className={cn(
+                    "relative flex flex-col items-center p-3 rounded-lg transition-all",
+                    "border hover:shadow-md",
+                    station.id === currentStation.id 
+                      ? "border-primary/50 bg-accent/20" 
+                      : "border-border/50 hover:border-border"
+                  )}
+                >
+                  <button
+                    onClick={() => changeStation(station)}
+                    className="absolute inset-0 w-full h-full z-10"
+                    aria-label={`Play ${station.name}`}
+                  />
+                  <div className="w-16 h-16 mb-2 overflow-hidden rounded-lg">
+                    <img 
+                      src={station.thumbnailUrl} 
+                      alt={station.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-medium">{station.name}</div>
+                    <div className="text-xs text-muted-foreground">{station.description}</div>
+                  </div>
+                  
+                  {/* Delete button */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteCustomStation(station.id);
+                          }}
+                          className="absolute top-1 right-1 p-1 rounded-full bg-background/80 hover:bg-destructive/90 hover:text-destructive-foreground z-20 transition-colors"
+                          aria-label={`Delete ${station.name}`}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete saved station</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               ))}
             </div>
           </div>
