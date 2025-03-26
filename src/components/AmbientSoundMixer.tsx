@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AmbientSound, ambientSounds } from '@/data/ambientSounds';
 import SoundButton from './SoundButton';
 import VolumeControl from './VolumeControl';
+import ProfileManager, { SoundProfile } from './ProfileManager';
 import { cn } from '@/lib/utils';
 
 interface ActiveSound {
@@ -94,15 +95,75 @@ const AmbientSoundMixer: React.FC<AmbientSoundMixerProps> = ({ className }) => {
     };
   }, []);
 
+  // Load a saved profile
+  const loadProfile = (profile: SoundProfile) => {
+    // Clear current sounds
+    Object.values(activeSounds).forEach(activeSound => {
+      if (activeSound.audioElement) {
+        activeSound.audioElement.pause();
+      }
+    });
+    setActiveSounds({});
+    
+    // Set master volume
+    setMasterVolume(profile.masterVolume);
+    
+    // Load saved sounds
+    const soundsToLoad = Object.values(profile.activeSounds);
+    
+    soundsToLoad.forEach(({ soundId, volume }) => {
+      const soundToAdd = ambientSounds.find(s => s.id === soundId);
+      if (soundToAdd) {
+        const audio = new Audio(soundToAdd.soundUrl);
+        audio.loop = true;
+        audio.volume = volume * profile.masterVolume;
+        
+        try {
+          audio.play().catch(error => {
+            console.error("Error playing sound:", error);
+          });
+        } catch (error) {
+          console.error("Error playing sound:", error);
+        }
+        
+        setActiveSounds(prev => ({
+          ...prev,
+          [soundToAdd.id]: {
+            sound: soundToAdd,
+            volume,
+            audioElement: audio
+          }
+        }));
+      }
+    });
+  };
+  
+  // Clear all active sounds
+  const clearAllSounds = () => {
+    Object.values(activeSounds).forEach(activeSound => {
+      if (activeSound.audioElement) {
+        activeSound.audioElement.pause();
+      }
+    });
+    setActiveSounds({});
+  };
+
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-medium">Ambient Sounds</h2>
-        <VolumeControl
-          volume={masterVolume}
-          onChange={setMasterVolume}
-          className="ml-auto"
-        />
+        <div className="flex items-center gap-2">
+          <ProfileManager 
+            activeSounds={activeSounds}
+            masterVolume={masterVolume}
+            onLoadProfile={loadProfile}
+            onClearSounds={clearAllSounds}
+          />
+          <VolumeControl
+            volume={masterVolume}
+            onChange={setMasterVolume}
+          />
+        </div>
       </div>
       
       <div className="grid grid-cols-4 gap-3 sm:grid-cols-8 mb-4 mt-3">

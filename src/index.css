@@ -131,3 +131,13 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@media (max-width: 420px) {
+  .glass-panel {
+    @apply bg-transparent border-0 shadow-none;
+  }
+  
+  .glass-panel-dark {
+    @apply bg-transparent border-0 shadow-none;
+  }
+}

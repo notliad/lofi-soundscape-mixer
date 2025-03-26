@@ -1,69 +1,82 @@
-# Welcome to your Lovable project
+# LoScapeFi - Lofi Soundscape Mixer
 
-## Project info
+![LoScapeFi](public/images/lofi-girl.png)
 
-**URL**: https://lovable.dev/projects/09f38564-3c41-40e1-a3ed-450dd816eba8
+A relaxing web application that combines lofi music streams with ambient soundscapes to create the perfect atmosphere for studying, working, or relaxing.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+### Radio Player
+- Stream popular lofi music channels including Lofi Girl, Chillhop Music, College Music, Jazz Hop Café, and The Bootleg Boy
+- Add and save custom YouTube stream URLs
+- Playback controls (play/pause, skip)
+- Volume adjustment
 
-**Use Lovable**
+### Ambient Sound Mixer
+- Mix multiple ambient sounds simultaneously
+- 9 high-quality ambient sound effects:
+  - 🌧️ Light Rain
+  - ⛈️ Heavy Rain
+  - 🌩️ Thunder Storm
+  - 🔥 Fireplace
+  - ☕ Café
+  - 🌬️ Wind
+  - 🌲 Forest
+  - 🌊 Ocean Waves
+  - 🪟 Rain on Window
+- Individual volume control for each sound
+- Master volume control
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/09f38564-3c41-40e1-a3ed-450dd816eba8) and start prompting.
+### User Experience
+- Beautiful glass-panel UI with smooth animations
+- Dark/light theme toggle
+- Responsive design for desktop and mobile devices
+- Real-time clock display
 
-Changes made via Lovable will be committed automatically to this repo.
+## Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the project directory
+cd lofi-soundscape-mixer
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Usage
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Radio Player**: Click on a radio station thumbnail to select it, then press the play button to start streaming. Adjust volume using the slider.
 
-**Use GitHub Codespaces**
+2. **Ambient Sounds**: Click on any sound icon to activate it. Click again to deactivate. Use the individual sliders to adjust the volume of each active sound.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+3. **Theme Toggle**: Click the sun/moon icon in the top right to switch between light and dark themes.
 
-## What technologies are used for this project?
+## Technologies Used
 
-This project is built with .
+- [Vite](https://vitejs.dev/) - Frontend build tool
+- [React](https://reactjs.org/) - UI library
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [shadcn/ui](https://ui.shadcn.com/) - UI component library
+- [next-themes](https://github.com/pacocoursey/next-themes) - Theme management
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Credits
 
-## How can I deploy this project?
+- Created by [@notliad](https://www.github.com/notliad)
+- Radio streams sourced from YouTube
+- Sound effects sourced from Pixabay
 
-Simply open [Lovable](https://lovable.dev/projects/09f38564-3c41-40e1-a3ed-450dd816eba8) and click on Share -> Publish.
+## License
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+This project is open source and available under the [MIT License](LICENSE).
