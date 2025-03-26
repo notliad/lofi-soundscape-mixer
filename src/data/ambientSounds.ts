@@ -9,50 +9,50 @@ export interface AmbientSound {
 export const ambientSounds: AmbientSound[] = [
   {
     id: "light-rain",
-    name: "Light Rain",
+    name: "Light Rain (Sound Effect by Mikhail from Pixabay)",
     icon: "🌧️",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3"
+    soundUrl: "/effects/light-rain.mp3"
   },
   {
     id: "heavy-rain",
-    name: "Heavy Rain",
+    name: "Heavy Rain (Sound Effect by Franco Gonzalez from Pixabay)",
     icon: "⛈️",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-heavy-rain-2688.mp3"
+    soundUrl: "/effects/heavy-rain.mp3"
   },
   {
     id: "thunder",
-    name: "Thunder",
+    name: "Thunder Storm (Sound Effect by Franco Gonzalez from Pixabay)",
     icon: "🌩️",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-thunder-1.mp3"
+    soundUrl: "/effects/thunder-rain.mp3"
   },
   {
     id: "fireplace",
-    name: "Fireplace",
+    name: "Fireplace (Sound Effect by RestfulDreamingTunes from Pixabay)",
     icon: "🔥",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-campfire-crackles-1330.mp3"
+    soundUrl: "/effects/fireplace.mp3"
   },
   {
     id: "cafe",
-    name: "Café",
+    name: "Café (Sound Effect by freesound_community from Pixabay)",
     icon: "☕",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-restaurant-ambience-general-2473.mp3"
+    soundUrl: "/effects/cafeteria.mp3"
   },
   {
     id: "wind",
-    name: "Wind",
+    name: "Wind (Sound Effect by Ghostie Graves from Pixabay)",
     icon: "🌬️",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-blizzard-cold-winds-1153.mp3"
+    soundUrl: "/effects/wind.mp3"
   },
   {
     id: "forest",
-    name: "Forest",
+    name: "Forest (Sound Effect by Empress-Kathryne Nefertiti-Mumbi from Pixabay)",
     icon: "🌲",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-forest-birds-singing-58.mp3"
+    soundUrl: "/effects/forest.mp3"
   },
   {
     id: "waves",
-    name: "Ocean Waves",
+    name: "Ocean Waves (Sound Effect by freesound_community from Pixabay)",
     icon: "🌊",
-    soundUrl: "https://assets.mixkit.co/sfx/preview/mixkit-sea-waves-loop-1196.mp3"
+    soundUrl: "/effects/ocean.mp3"
   }
 ];

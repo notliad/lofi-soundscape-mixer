@@ -105,7 +105,7 @@ const AmbientSoundMixer: React.FC<AmbientSoundMixerProps> = ({ className }) => {
         />
       </div>
       
-      <div className="grid grid-cols-4 gap-3 sm:grid-cols-8 mb-4">
+      <div className="grid grid-cols-4 gap-3 sm:grid-cols-8 mb-4 mt-3">
         {ambientSounds.map((sound) => (
           <SoundButton
             key={sound.id}
