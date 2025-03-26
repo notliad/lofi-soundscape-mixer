@@ -50,7 +50,7 @@ const Index = () => {
       <main className="container max-w-4xl mx-auto flex-1 flex flex-col">
         {/* Radio Player - Positioned at the top */}
         <div 
-          className={`transition-all duration-700 delay-100 transform ${
+          className={`transition-all duration-300 delay-100 transform ${
             isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >

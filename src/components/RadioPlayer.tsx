@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Play, Pause, SkipForward, SkipBack, ExternalLink, Headphones, Smile, Link, Plus, Save, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from "next-themes";
@@ -40,17 +40,44 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
       // Pause the stream by setting source to blank
       videoElement.src = '';
     } else {
-      // Play by setting the source
-      videoElement.src = `${currentStation.streamUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0`;
+      // Play by setting the source with enablejsapi=1 to allow API control
+      videoElement.src = `${currentStation.streamUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0&enablejsapi=1`;
+      
+      // Set initial volume after a short delay to ensure the iframe has loaded
+      setTimeout(() => {
+        try {
+          videoElement.contentWindow?.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'setVolume',
+            args: [volume * 100],
+          }), '*');
+        } catch (error) {
+          console.error('Error setting initial volume:', error);
+        }
+      }, 1000);
     }
     
     setIsPlaying(!isPlaying);
   };
 
+  // YouTube Player API reference
+  const youtubePlayer = useRef<any>(null);
+
   useEffect(() => {
     // Find the iframe element
     const iframe = document.getElementById('youtube-iframe') as HTMLIFrameElement;
     setVideoElement(iframe);
+
+    // Load YouTube API script
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Define the onYouTubeIframeAPIReady function
+    (window as any).onYouTubeIframeAPIReady = () => {
+      console.log('YouTube API ready');
+    };
 
     // Load saved stations from localStorage
     const savedStationsJson = localStorage.getItem(SAVED_STATIONS_KEY);
@@ -68,15 +95,48 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
       if (iframe) {
         iframe.src = '';
       }
+      // Remove the global function
+      delete (window as any).onYouTubeIframeAPIReady;
     };
   }, []);
+
+  // Effect to handle volume changes
+  useEffect(() => {
+    // Use postMessage to control volume if iframe exists
+    if (videoElement && isPlaying) {
+      try {
+        // YouTube iframe API uses values between 0-100 for volume
+        videoElement.contentWindow?.postMessage(JSON.stringify({
+          event: 'command',
+          func: 'setVolume',
+          args: [volume * 100],
+        }), '*');
+      } catch (error) {
+        console.error('Error setting volume:', error);
+      }
+    }
+  }, [volume, videoElement, isPlaying]);
 
   const changeStation = (station: RadioStation) => {
     setCurrentStation(station);
     setIsCustomStation(false);
     
     if (isPlaying && videoElement) {
-      videoElement.src = `${station.streamUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0`;
+      // Include enablejsapi=1 to allow API control
+      videoElement.src = `${station.streamUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0&enablejsapi=1`;
+      
+      // Set volume after a short delay to ensure the iframe has loaded
+      setTimeout(() => {
+        try {
+          videoElement.contentWindow?.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'setVolume',
+            args: [volume * 100],
+          }), '*');
+        } catch (error) {
+          console.error('Error setting volume after station change:', error);
+        }
+      }, 1000);
     }
   };
 
@@ -134,7 +194,20 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
     localStorage.setItem(SAVED_STATIONS_KEY, JSON.stringify(updatedSavedStations));
     
     if (isPlaying && videoElement) {
-      videoElement.src = `${processedUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0`;
+      videoElement.src = `${processedUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0&enablejsapi=1`;
+      
+      // Set volume after a short delay to ensure the iframe has loaded
+      setTimeout(() => {
+        try {
+          videoElement.contentWindow?.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'setVolume',
+            args: [volume * 100],
+          }), '*');
+        } catch (error) {
+          console.error('Error setting volume for custom station:', error);
+        }
+      }, 1000);
     }
     
     // Show success toast and close dialog
@@ -307,7 +380,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
               <VolumeControl 
                 volume={volume}
                 onChange={setVolume}
-                className="ml-4"
+                className="ml-4 mr-2"
               />
               
               <TooltipProvider>
@@ -516,6 +589,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
           frameBorder="0" 
           allow="autoplay" 
           title="YouTube Audio Player"
+          enablejsapi="1"
         ></iframe>
       </div>
     </div>
