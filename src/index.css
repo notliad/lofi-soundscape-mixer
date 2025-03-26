@@ -132,12 +132,16 @@
   scrollbar-width: none;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 500px) {
   .glass-panel {
     @apply bg-transparent border-0 shadow-none;
   }
   
   .glass-panel-dark {
     @apply bg-transparent border-0 shadow-none;
+  }
+
+  .ambient {
+    @apply gap-3 flex-col;
   }
 }

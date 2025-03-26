@@ -69,7 +69,6 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
     // Find the iframe element
     const iframe = document.getElementById('youtube-iframe') as HTMLIFrameElement;
     setVideoElement(iframe);
-
     // Load YouTube API script
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
@@ -78,7 +77,11 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
 
     // Define the onYouTubeIframeAPIReady function
     (window as any).onYouTubeIframeAPIReady = () => {
-      console.log('YouTube API ready');
+      try {
+        console.log('YouTube API ready');
+      } catch (error) {
+        console.log('Error loading YouTube API:', error);
+      }
     };
 
     // Load saved stations from localStorage
@@ -259,12 +262,6 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
 
   return (
     <div className={cn(`${theme === 'dark' ? 'glass-panel-dark' : 'glass-panel'} transition-all duration-300 delay-100 rounded-2xl p-4 sm:p-6 backdrop-blur-md relative`, className)}>
-      {/* Friendly welcome/description */}
-      <div className="absolute top-3 right-4 flex items-center gap-2 text-muted-foreground">
-        <Smile className="w-4 h-4 text-yellow-500" />
-        <span className="text-xs">Relax & study</span>
-      </div>
-
       <div className="relative flex flex-col">
         {/* Current station and player */}
         <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4">

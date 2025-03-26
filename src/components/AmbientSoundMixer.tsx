@@ -15,7 +15,7 @@ interface AmbientSoundMixerProps {
   className?: string;
 }
 
-const AmbientSoundMixer: React.FC<AmbientSoundMixerProps> = ({ className }) => {
+const AmbientSoundMixer: React.FC<AmbientSoundMixerProps> = () => {
   const [activeSounds, setActiveSounds] = useState<Record<string, ActiveSound>>({});
   const [masterVolume, setMasterVolume] = useState(0.5);
 
@@ -149,8 +149,8 @@ const AmbientSoundMixer: React.FC<AmbientSoundMixerProps> = ({ className }) => {
   };
 
   return (
-    <div className={cn('flex flex-col', className)}>
-      <div className="flex items-center justify-between mb-2">
+    <div className={`flex flex-col`}>
+      <div className="ambient flex items-center justify-between mb-2">
         <h2 className="text-lg font-medium">Ambient Sounds</h2>
         <div className="flex items-center gap-2">
           <ProfileManager 

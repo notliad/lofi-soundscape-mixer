@@ -5,6 +5,7 @@ import AmbientSoundMixer from '@/components/AmbientSoundMixer';
 import { Headphones, Music } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import KofiButton from '@/components/KofiButton';
 
 const Index = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -50,7 +51,7 @@ const Index = () => {
       <main className="container max-w-4xl mx-auto flex-1 flex flex-col">
         {/* Radio Player - Positioned at the top */}
         <div 
-          className={`transition-all duration-300 delay-100 transform ${
+          className={`transition-all transform ${
             isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
@@ -74,7 +75,13 @@ const Index = () => {
         >
           <p>Created by <a href='https://www.github.com/notliad'>@notliad</a>. Streams sourced from YouTube.</p>
         </div>
+              {/* Ko-fi Button */}
+      <KofiButton className={`${
+            isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`} />
       </main>
+      
+
     </div>
   );
 };
