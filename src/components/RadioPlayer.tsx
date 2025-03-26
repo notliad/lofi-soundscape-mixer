@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { Play, Pause, SkipForward, SkipBack, ExternalLink } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, ExternalLink, Headphones, Smile } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import VolumeControl from './VolumeControl';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { defaultStation, RadioStation, radioStations } from '@/data/radioStations';
 
 interface RadioPlayerProps {
@@ -66,7 +67,13 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   };
 
   return (
-    <div className={cn('glass-panel rounded-2xl p-6 backdrop-blur-md', className)}>
+    <div className={cn('glass-panel rounded-2xl p-6 backdrop-blur-md relative', className)}>
+      {/* Friendly welcome/description */}
+      <div className="absolute top-2 right-2 flex items-center gap-2 text-muted-foreground">
+        <Smile className="w-4 h-4 text-yellow-500" />
+        <span className="text-xs">Relax & study</span>
+      </div>
+
       <div className="relative flex items-start gap-4">
         {/* Station artwork */}
         <div className="relative min-w-[120px] w-32">
@@ -81,40 +88,59 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
             />
           </div>
           
-          {/* Play button overlay */}
-          <button 
-            className={cn(
-              "absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl",
-              "transition-opacity hover:bg-black/40",
-              isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
-            )}
-            onClick={togglePlay}
-            aria-label={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? (
-              <Pause className="w-12 h-12 text-white" />
-            ) : (
-              <Play className="w-12 h-12 text-white" />
-            )}
-          </button>
+          {/* Play button overlay with tooltip */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  className={cn(
+                    "absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl",
+                    "transition-opacity hover:bg-black/40",
+                    isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
+                  )}
+                  onClick={togglePlay}
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? (
+                    <Pause className="w-12 h-12 text-white" />
+                  ) : (
+                    <Play className="w-12 h-12 text-white" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isPlaying ? "Pause lofi stream" : "Start lofi stream"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         
         {/* Station info */}
         <div className="flex-1">
           <div className="relative">
-            <button 
-              onClick={() => setStationMenuOpen(!stationMenuOpen)}
-              className="flex items-start text-left w-full group"
-            >
-              <div>
-                <h2 className="text-xl font-semibold leading-tight group-hover:underline">
-                  {currentStation.name}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {currentStation.description}
-                </p>
-              </div>
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={() => setStationMenuOpen(!stationMenuOpen)}
+                    className="flex items-start text-left w-full group"
+                  >
+                    <div>
+                      <h2 className="text-xl font-semibold leading-tight group-hover:underline flex items-center gap-2">
+                        <Headphones className="w-5 h-5 text-primary/70" />
+                        {currentStation.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {currentStation.description}
+                      </p>
+                    </div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Click to change lofi station</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
             {/* Station selector dropdown */}
             {stationMenuOpen && (
@@ -148,37 +174,64 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
           
           {/* Player controls */}
           <div className="flex items-center gap-2 mt-6">
-            <button 
-              onClick={prevStation}
-              className="p-2 text-foreground/70 hover:text-foreground transition-colors"
-              aria-label="Previous station"
-            >
-              <SkipBack size={18} />
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <button 
+                    onClick={prevStation}
+                    className="p-2 text-foreground/70 hover:text-foreground transition-colors"
+                    aria-label="Previous station"
+                  >
+                    <SkipBack size={18} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Previous lofi station</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
-            <button 
-              onClick={togglePlay}
-              className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center",
-                "bg-primary text-primary-foreground shadow-sm",
-                "hover:bg-primary/90 transition-colors"
-              )}
-              aria-label={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <Pause size={18} />
-              ) : (
-                <Play size={18} className="ml-0.5" />
-              )}
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <button 
+                    onClick={togglePlay}
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center",
+                      "bg-primary text-primary-foreground shadow-sm",
+                      "hover:bg-primary/90 transition-colors"
+                    )}
+                    aria-label={isPlaying ? "Pause" : "Play"}
+                  >
+                    {isPlaying ? (
+                      <Pause size={18} />
+                    ) : (
+                      <Play size={18} className="ml-0.5" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{isPlaying ? "Pause music" : "Play music"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
-            <button 
-              onClick={nextStation}
-              className="p-2 text-foreground/70 hover:text-foreground transition-colors"
-              aria-label="Next station"
-            >
-              <SkipForward size={18} />
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <button 
+                    onClick={nextStation}
+                    className="p-2 text-foreground/70 hover:text-foreground transition-colors"
+                    aria-label="Next station"
+                  >
+                    <SkipForward size={18} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Next lofi station</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
             <VolumeControl 
               volume={volume}
@@ -186,15 +239,24 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
               className="ml-4"
             />
             
-            <a 
-              href={currentStation.streamUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="ml-auto p-2 text-foreground/50 hover:text-foreground transition-colors"
-              aria-label="Open in YouTube"
-            >
-              <ExternalLink size={16} />
-            </a>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <a 
+                    href={currentStation.streamUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="ml-auto p-2 text-foreground/50 hover:text-foreground transition-colors"
+                    aria-label="Open in YouTube"
+                  >
+                    <ExternalLink size={16} />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Open current station on YouTube</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </div>
@@ -215,3 +277,4 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
 };
 
 export default RadioPlayer;
+
