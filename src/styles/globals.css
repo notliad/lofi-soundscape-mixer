@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/80 border border-white/20;
+  }
+  
+  .glass-panel-dark {
+    @apply bg-black/40 border border-white/10;
+  }
+  
+  .rotate-record {
+    animation: rotate 20s linear infinite;
+  }
+  
+  .animate-pulse-subtle {
+    animation: pulse-subtle 3s ease-in-out infinite;
+  }
+  
+  .slider-track {
+    @apply h-1 bg-gray-200 dark:bg-gray-700 rounded-full;
+  }
+  
+  .slider-range {
+    @apply h-full bg-primary rounded-full;
+  }
+  
+  .slider-thumb {
+    @apply w-4 h-4 bg-primary rounded-full;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}

@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Play, Pause, SkipForward, SkipBack, ExternalLink, Headphones, Smile, Link, Plus, Save, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from "next-themes";
@@ -32,6 +33,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   const [showSavedStations, setShowSavedStations] = useState(false);
   const { theme } = useTheme();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const togglePlay = () => {
     if (!videoElement) return;
@@ -256,7 +258,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   };
 
   return (
-    <div className={cn(`${theme === 'dark' ? 'glass-panel-dark' : 'glass-panel'} transition-all duration-300 delay-100 rounded-2xl p-6 backdrop-blur-md relative`, className)}>
+    <div className={cn(`${theme === 'dark' ? 'glass-panel-dark' : 'glass-panel'} transition-all duration-300 delay-100 rounded-2xl p-4 sm:p-6 backdrop-blur-md relative`, className)}>
       {/* Friendly welcome/description */}
       <div className="absolute top-3 right-4 flex items-center gap-2 text-muted-foreground">
         <Smile className="w-4 h-4 text-yellow-500" />
@@ -265,9 +267,9 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
 
       <div className="relative flex flex-col">
         {/* Current station and player */}
-        <div className="relative flex items-start gap-4 mb-4">
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4">
           {/* Station artwork */}
-          <div className="relative min-w-[120px] w-32">
+          <div className="relative min-w-[100px] w-28 sm:min-w-[120px] sm:w-32">
             <div className="w-full aspect-square rounded-xl overflow-hidden shadow-lg">
               <img 
                 src={currentStation.thumbnailUrl} 
@@ -307,9 +309,9 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
           </div>
           
           {/* Station info */}
-          <div className="flex-1">
+          <div className="flex-1 text-center sm:text-left mt-3 sm:mt-0">
             <div>
-              <h2 className="text-xl font-semibold leading-tight flex items-center gap-2">
+              <h2 className="text-xl font-semibold leading-tight flex items-center gap-2 justify-center sm:justify-start">
                 {currentStation.name}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
@@ -317,7 +319,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
               </p>
             </div>
             {/* Player controls */}
-            <div className="flex items-center gap-2 mt-6">
+            <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 sm:mt-6">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -405,15 +407,15 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
           </div>
           
         </div>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2 sm:gap-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <h2 className="text-lg font-medium flex items-center gap-2">
               <Headphones className="w-5 h-5 text-primary/70" />
               <button 
                 onClick={() => setShowStationGrid(!showStationGrid)}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                {showStationGrid ? 'Hide Default Stations' : 'Show Default Stations'}
+                {showStationGrid ? 'Hide Stations' : 'Show Stations'}
               </button>
             </h2>
             
@@ -423,7 +425,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
               >
                 <Save size={14} />
-                {showSavedStations ? 'Hide Saved Stations' : 'Show Saved Stations'}
+                {showSavedStations ? 'Hide Saved' : 'Show Saved'}
               </button>
             )}
           </div>
@@ -487,7 +489,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
         {/* Default Station Grid */}
         {showStationGrid && (
           <div className="animate-fade-in">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-2">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mt-2">
               {radioStations.map(station => (
                 <button
                   key={station.id}
@@ -500,7 +502,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
                       : "border-border/50 hover:border-border"
                   )}
                 >
-                  <div className="w-16 h-16 mb-2 overflow-hidden rounded-lg">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 mb-2 overflow-hidden rounded-lg">
                     <img 
                       src={station.thumbnailUrl} 
                       alt={station.name} 
@@ -524,7 +526,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
               <Save size={14} className="text-primary/70" />
               Your Saved Stations
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-2">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mt-2">
               {savedStations.map(station => (
                 <div
                   key={station.id}
@@ -541,7 +543,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
                     className="absolute inset-0 w-full h-full z-10"
                     aria-label={`Play ${station.name}`}
                   />
-                  <div className="w-16 h-16 mb-2 overflow-hidden rounded-lg">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 mb-2 overflow-hidden rounded-lg">
                     <img 
                       src={station.thumbnailUrl} 
                       alt={station.name} 
