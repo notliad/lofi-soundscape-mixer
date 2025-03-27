@@ -73,7 +73,7 @@ const Index = () => {
             isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <p>Created by <a href='https://www.github.com/notliad'>@notliad</a>. Streams sourced from YouTube.</p>
+          <p>Created by <a className='font-bold' href='https://www.github.com/notliad'>@notliad</a>. Streams sourced from YouTube.</p>
         </div>
               {/* Ko-fi Button */}
       <KofiButton className={`${

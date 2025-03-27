@@ -233,15 +233,39 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   };
 
   const nextStation = () => {
-    const currentIndex = radioStations.findIndex(station => station.id === currentStation.id);
-    const nextIndex = (currentIndex + 1) % radioStations.length;
-    changeStation(radioStations[nextIndex]);
+    // Combine default and saved stations for navigation
+    const allStations = [...radioStations, ...savedStations];
+    
+    // Find the current station in the combined array
+    const currentIndex = allStations.findIndex(station => station.id === currentStation.id);
+    
+    // If station not found in the combined array, default to the first station
+    if (currentIndex === -1) {
+      changeStation(allStations[0]);
+      return;
+    }
+    
+    // Calculate the next index with wraparound
+    const nextIndex = (currentIndex + 1) % allStations.length;
+    changeStation(allStations[nextIndex]);
   };
 
   const prevStation = () => {
-    const currentIndex = radioStations.findIndex(station => station.id === currentStation.id);
-    const prevIndex = (currentIndex - 1 + radioStations.length) % radioStations.length;
-    changeStation(radioStations[prevIndex]);
+    // Combine default and saved stations for navigation
+    const allStations = [...radioStations, ...savedStations];
+    
+    // Find the current station in the combined array
+    const currentIndex = allStations.findIndex(station => station.id === currentStation.id);
+    
+    // If station not found in the combined array, default to the last station
+    if (currentIndex === -1) {
+      changeStation(allStations[allStations.length - 1]);
+      return;
+    }
+    
+    // Calculate the previous index with wraparound
+    const prevIndex = (currentIndex - 1 + allStations.length) % allStations.length;
+    changeStation(allStations[prevIndex]);
   };
   
   const deleteCustomStation = (stationId: string) => {
@@ -462,7 +486,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="custom-url">YouTube URL</Label>
+                  <Label htmlFor="custom-url">YouTube URL (Playlists not supported yet)</Label>
                   <Input
                     id="custom-url"
                     placeholder="https://www.youtube.com/watch?v=..."
