@@ -17,7 +17,7 @@ interface RadioPlayerProps {
   className?: string;
 }
 
-const SAVED_STATIONS_KEY = 'lofi-soundscape-saved-stations';
+const SAVED_STATIONS_KEY = 'loscapefi-saved-stations';
 
 const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   const [currentStation, setCurrentStation] = useState<RadioStation>(defaultStation);
@@ -458,7 +458,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-1">
                       <Plus size={16} />
-                      <span className="hidden sm:inline">Add Station</span>
+                      <span className="sm:inline">Add Station</span>
                     </Button>
                   </DialogTrigger>
                 </TooltipTrigger>
