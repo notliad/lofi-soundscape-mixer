@@ -140,8 +140,4 @@
   .glass-panel-dark {
     @apply bg-transparent border-0 shadow-none;
   }
-
-  .ambient {
-    @apply gap-3 flex-col;
-  }
 }

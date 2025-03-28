@@ -150,9 +150,9 @@ const AmbientSoundMixer: React.FC<AmbientSoundMixerProps> = () => {
 
   return (
     <div className={`flex flex-col`}>
-      <div className="ambient flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 max-xs:gap-3 max-xs:flex-col">
         <h2 className="text-lg font-medium">Ambient Sounds</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-xs:gap-3 max-xs:flex-col">
           <ProfileManager 
             activeSounds={activeSounds}
             masterVolume={masterVolume}

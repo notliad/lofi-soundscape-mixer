@@ -1,12 +1,12 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Play, Pause, SkipForward, SkipBack, ExternalLink, Headphones, Smile, Link, Plus, Save, Trash2 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, ExternalLink, Headphones, Plus, Save, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from "next-themes";
 import VolumeControl from './VolumeControl';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { defaultStation, RadioStation, radioStations } from '@/data/radioStations';
@@ -31,9 +31,10 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
   const [isCustomStation, setIsCustomStation] = useState(false);
   const [savedStations, setSavedStations] = useState<RadioStation[]>([]);
   const [showSavedStations, setShowSavedStations] = useState(false);
+  const [playbackError, setPlaybackError] = useState(false);
+  const [errorTryCount ,setErrorRetryCount] = useState(0);
   const { theme } = useTheme();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
 
   const togglePlay = () => {
     if (!videoElement) return;
@@ -44,7 +45,10 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
     } else {
       // Play by setting the source with enablejsapi=1 to allow API control
       videoElement.src = `${currentStation.streamUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0&enablejsapi=1`;
+
       
+
+      console.log(videoElement);
       // Set initial volume after a short delay to ensure the iframe has loaded
       setTimeout(() => {
         try {
@@ -77,11 +81,7 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
 
     // Define the onYouTubeIframeAPIReady function
     (window as any).onYouTubeIframeAPIReady = () => {
-      try {
         console.log('YouTube API ready');
-      } catch (error) {
-        console.log('Error loading YouTube API:', error);
-      }
     };
 
     // Load saved stations from localStorage
@@ -340,96 +340,99 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
               </p>
             </div>
             {/* Player controls */}
-            <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 sm:mt-6">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <button 
-                      onClick={prevStation}
-                      className="p-2 text-foreground/70 hover:text-foreground transition-colors"
-                      aria-label="Previous station"
-                    >
-                      <SkipBack size={18} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Previous lofi station</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <button 
-                      onClick={togglePlay}
-                      className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center",
-                        "bg-primary text-primary-foreground shadow-sm",
-                        "hover:bg-primary/90 transition-colors"
-                      )}
-                      aria-label={isPlaying ? "Pause" : "Play"}
-                    >
-                      {isPlaying ? (
-                        <Pause size={18} />
-                      ) : (
-                        <Play size={18} className="ml-0.5" />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isPlaying ? "Pause music" : "Play music"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <button 
-                      onClick={nextStation}
-                      className="p-2 text-foreground/70 hover:text-foreground transition-colors"
-                      aria-label="Next station"
-                    >
-                      <SkipForward size={18} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Next lofi station</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <VolumeControl 
-                volume={volume}
-                onChange={setVolume}
-                className="ml-4 mr-2"
-              />
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <a 
-                      href={currentStation.streamUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="ml-auto p-2 text-foreground/50 hover:text-foreground transition-colors"
-                      aria-label="Open in YouTube"
-                    >
-                      <ExternalLink size={16} />
-                    </a>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Open current station on YouTube</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+            <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 sm:mt-6 max-xs:gap-3 max-xs:flex-col">
+              <div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button 
+                        onClick={prevStation}
+                        className="p-2 text-foreground/70 hover:text-foreground transition-colors"
+                        aria-label="Previous station"
+                      >
+                        <SkipBack size={18} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Previous lofi station</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button 
+                        onClick={togglePlay}
+                        className={cn(
+                          "w-10 h-10 rounded-full flex items-center justify-center",
+                          "bg-primary text-primary-foreground shadow-sm",
+                          "hover:bg-primary/90 transition-colors"
+                        )}
+                        aria-label={isPlaying ? "Pause" : "Play"}
+                      >
+                        {isPlaying ? (
+                          <Pause size={18} />
+                        ) : (
+                          <Play size={18} className="ml-0.5" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isPlaying ? "Pause music" : "Play music"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button 
+                        onClick={nextStation}
+                        className="p-2 text-foreground/70 hover:text-foreground transition-colors"
+                        aria-label="Next station"
+                      >
+                        <SkipForward size={18} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Next lofi station</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="flex">
+                <VolumeControl 
+                  volume={volume}
+                  onChange={setVolume}
+                  className="ml-4 mr-2"
+                />
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <a 
+                        href={currentStation.streamUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="ml-auto p-2 text-foreground/50 hover:text-foreground transition-colors"
+                        aria-label="Open in YouTube"
+                      >
+                        <ExternalLink size={16} />
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Open current station on YouTube</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
           
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2 sm:gap-0">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 max-xs:justify-center">
             <h2 className="text-lg font-medium flex items-center gap-2">
               <Headphones className="w-5 h-5 text-primary/70" />
               <button 
@@ -603,16 +606,45 @@ const RadioPlayer: React.FC<RadioPlayerProps> = ({ className }) => {
         )}
       </div>
       
+      {/* Error message for playback issues */}
+      {playbackError && isPlaying && (
+        <Alert variant="destructive" className={`${theme === 'light' && 'bg-red-500'} mt-4 animate-fade-in `}>
+          <AlertTriangle className={'h-4 w-4'} color={theme === 'light' ? 'white' : 'red'} />
+          <AlertTitle className={`${theme === 'light' && 'text-white'}`}>Playback Error</AlertTitle>
+          <AlertDescription>
+            <p className={`${theme === 'light' && 'text-white'}`}>Unable to play this YouTube stream. This may be caused by a VPN connection or network restrictions.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2 gap-1"
+              onClick={() => {
+                // Retry playback with incremented retry count
+                setErrorRetryCount(prev => prev + 1);
+                setPlaybackError(false);
+                
+                if (videoElement) {
+                  // Reload the iframe with the stream URL
+                  videoElement.src = `${currentStation.streamUrl.replace('watch?v=', 'embed/')}?autoplay=1&mute=0&controls=0&enablejsapi=1&origin=${window.location.origin}`;
+                }
+              }}
+            >
+              <RefreshCw size={14} />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {/* Hidden iframe for YouTube */}
       <div className="hidden">
         <iframe 
           id="youtube-iframe"
           width="0" 
           height="0" 
-          frameBorder="0" 
           allow="autoplay" 
           title="YouTube Audio Player"
           enablejsapi="1"
+          onError={() => setPlaybackError(true)}
         ></iframe>
       </div>
     </div>
