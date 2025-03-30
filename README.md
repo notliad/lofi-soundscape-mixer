@@ -1,8 +1,8 @@
-# LoScapeFi - Lofi Soundscape Mixer
+# [LoScapeFi](https://loscapefi.netlify.app/) - Lofi Soundscape Mixer
 
-![LoScapeFi](public/favicon.ico)
+![LoScapeFi](public/favicon.ico) A relaxing web application that combines lofi music streams with ambient soundscapes to create the perfect atmosphere for studying, working, or relaxing.
 
-A relaxing web application that combines lofi music streams with ambient soundscapes to create the perfect atmosphere for studying, working, or relaxing.
+![Captura de tela 2025-03-27 145244](https://github.com/user-attachments/assets/2446050d-7c25-4d45-bc36-4abef63b1b58)
 
 ## Development Process
 
