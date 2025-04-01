@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect} from "react";
 import { useTheme } from "next-themes";
 
 type ThemeProviderProps = {

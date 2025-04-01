@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import RadioPlayer from '@/components/RadioPlayer';
 import AmbientSoundMixer from '@/components/AmbientSoundMixer';
+import PomodoroTimer from '@/components/PomodoroTimer';
 import { Headphones, Music } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -91,6 +92,17 @@ const Index = () => {
         >
           <h2 className="sr-only">Ambient Sound Controls</h2>
           <AmbientSoundMixer />
+        </section>
+
+        {/* Pomodoro Timer */}
+        <section 
+          aria-label="Pomodoro Timer"
+          className={`${theme === 'dark' ? 'glass-panel-dark' : 'glass-panel' } rounded-2xl p-6 backdrop-blur-md mb-6 transition-all duration-300 delay-200 transform ${
+            isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <h2 className="sr-only">Pomodoro Timer</h2>
+          <PomodoroTimer />
         </section>
         
         {/* Credits Section */}

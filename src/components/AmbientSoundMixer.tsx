@@ -3,7 +3,7 @@ import { AmbientSound, ambientSounds } from '@/data/ambientSounds';
 import SoundButton from './SoundButton';
 import VolumeControl from './VolumeControl';
 import ProfileManager, { SoundProfile } from './ProfileManager';
-import { cn } from '@/lib/utils';
+import { AudioLines } from 'lucide-react';
 
 interface ActiveSound {
   sound: AmbientSound;
@@ -151,7 +151,10 @@ const AmbientSoundMixer: React.FC<AmbientSoundMixerProps> = () => {
   return (
     <div className={`flex flex-col`}>
       <div className="flex items-center justify-between mb-2 max-xs:gap-3 max-xs:flex-col">
-        <h2 className="text-lg font-medium">Ambient Sounds</h2>
+        <div className="flex items-center gap-2">
+          <AudioLines className="w-5 h-5" aria-hidden="true" />
+          <h2 className="text-lg font-medium">Ambient Sounds</h2>
+        </div>
         <div className="flex items-center gap-2 max-xs:gap-3 max-xs:flex-col">
           <ProfileManager 
             activeSounds={activeSounds}
