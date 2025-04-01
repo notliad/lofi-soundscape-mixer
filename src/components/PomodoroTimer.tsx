@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Timer, Pause, Play, RotateCcw, Coffee, ChevronDown, ChevronUp } from 'lucide-react';
+import { Timer, Pause, Play, RotateCcw, Coffee, ChevronDown, ChevronUp, CopyrightIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -250,6 +250,9 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
               <Coffee className="w-3 h-3" /> Break time
             </div>
           )}
+            <div className="flex items-center justify-center gap-1 mt-4">
+          <CopyrightIcon className='w-3 h-3' /> Sound Effect by <a href="https://pixabay.com/pt/users/liecio-3298866/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=189741">LIECIO</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=189741">Pixabay</a>
+          </div>
         </div>
       </div>
       </CollapsibleContent>
