@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Timer, Pause, Play, RotateCcw, Coffee, ChevronDown, ChevronUp, CopyrightIcon } from 'lucide-react';
+import { Timer, Pause, Play, RotateCcw, Coffee, ChevronDown, ChevronUp, CopyrightIcon, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme } from 'next-themes';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 interface PomodoroTimerProps {
   className?: string;
@@ -26,20 +30,25 @@ const DEFAULT_TIMER_SETTINGS: TimerSettings = {
 };
 
 const POMODORO_COLLAPSED_KEY = 'lofi-pomodoro-collapsed';
+const POMODORO_SETTINGS_KEY = 'lofi-pomodoro-settings';
 
 const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
   const [mode, setMode] = useState<TimerMode>('work');
+  const [timerSettings, setTimerSettings] = useState<TimerSettings>(DEFAULT_TIMER_SETTINGS);
   const [timeLeft, setTimeLeft] = useState<number>(DEFAULT_TIMER_SETTINGS.work);
   const [isActive, setIsActive] = useState<boolean>(false);
   const [completedPomodoros, setCompletedPomodoros] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(true); // Default to collapsed
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const [tempSettings, setTempSettings] = useState<TimerSettings>(DEFAULT_TIMER_SETTINGS);
   const { theme } = useTheme();
+  const { toast } = useToast();
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize audio for notifications and load collapsed state
+  // Initialize audio for notifications and load saved states
   useEffect(() => {
     audioRef.current = new Audio('/effects/bell.mp3');
     
@@ -47,6 +56,21 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
     const savedCollapsedState = localStorage.getItem(POMODORO_COLLAPSED_KEY);
     if (savedCollapsedState !== null) {
       setIsCollapsed(savedCollapsedState === 'true');
+    }
+    
+    // Load timer settings from localStorage
+    const savedSettings = localStorage.getItem(POMODORO_SETTINGS_KEY);
+    if (savedSettings !== null) {
+      try {
+        const parsedSettings = JSON.parse(savedSettings) as TimerSettings;
+        setTimerSettings(parsedSettings);
+        setTempSettings(parsedSettings);
+        if (!isActive) {
+          setTimeLeft(parsedSettings[mode]);
+        }
+      } catch (error) {
+        console.error('Error parsing saved timer settings:', error);
+      }
     }
     
     return () => {
@@ -85,10 +109,10 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
 
   // Update progress bar
   useEffect(() => {
-    const totalTime = DEFAULT_TIMER_SETTINGS[mode];
+    const totalTime = timerSettings[mode];
     const progressPercentage = ((totalTime - timeLeft) / totalTime) * 100;
     setProgress(progressPercentage);
-  }, [timeLeft, mode]);
+  }, [timeLeft, mode, timerSettings]);
 
   const playNotificationSound = () => {
     if (audioRef.current) {
@@ -120,7 +144,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
 
   const switchMode = (newMode: TimerMode) => {
     setMode(newMode);
-    setTimeLeft(DEFAULT_TIMER_SETTINGS[newMode]);
+    setTimeLeft(timerSettings[newMode]);
     setProgress(0);
   };
 
@@ -130,7 +154,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
 
   const resetTimer = () => {
     setIsActive(false);
-    setTimeLeft(DEFAULT_TIMER_SETTINGS[mode]);
+    setTimeLeft(timerSettings[mode]);
     setProgress(0);
   };
 
@@ -158,6 +182,52 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
     const newCollapsedState = !isCollapsed;
     setIsCollapsed(newCollapsedState);
     localStorage.setItem(POMODORO_COLLAPSED_KEY, newCollapsedState.toString());
+  };
+  
+  // Save timer settings
+  const saveSettings = () => {
+    // Validate settings
+    if (tempSettings.work <= 0 || tempSettings.shortBreak <= 0 || tempSettings.longBreak <= 0) {
+      toast({
+        title: "Invalid settings",
+        description: "All timer durations must be greater than 0.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Update settings
+    setTimerSettings(tempSettings);
+    localStorage.setItem(POMODORO_SETTINGS_KEY, JSON.stringify(tempSettings));
+    
+    // Update current timer if not active
+    if (!isActive) {
+      setTimeLeft(tempSettings[mode]);
+      setProgress(0);
+    }
+    
+    setSettingsOpen(false);
+    
+    toast({
+      title: "Settings saved",
+      description: "Your timer settings have been updated."
+    });
+  };
+  
+  // Handle input changes for timer settings
+  const handleSettingChange = (setting: keyof TimerSettings, value: string) => {
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue)) {
+      setTempSettings(prev => ({
+        ...prev,
+        [setting]: numValue * 60 // Convert minutes to seconds
+      }));
+    }
+  };
+  
+  // Format minutes for input display
+  const formatMinutes = (seconds: number): string => {
+    return Math.floor(seconds / 60).toString();
   };
 
   return (
@@ -237,6 +307,17 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              setTempSettings({...timerSettings});
+              setSettingsOpen(true);
+            }}
+            aria-label="Timer Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -256,6 +337,71 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ className }) => {
         </div>
       </div>
       </CollapsibleContent>
+      
+      {/* Settings Dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Timer Settings</DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="workTime" className="text-right">
+                Work Time
+              </Label>
+              <Input
+                id="workTime"
+                type="number"
+                min="1"
+                max="120"
+                className="col-span-3"
+                value={formatMinutes(tempSettings.work)}
+                onChange={(e) => handleSettingChange('work', e.target.value)}
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="shortBreakTime" className="text-right">
+                Short Break
+              </Label>
+              <Input
+                id="shortBreakTime"
+                type="number"
+                min="1"
+                max="30"
+                className="col-span-3"
+                value={formatMinutes(tempSettings.shortBreak)}
+                onChange={(e) => handleSettingChange('shortBreak', e.target.value)}
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="longBreakTime" className="text-right">
+                Long Break
+              </Label>
+              <Input
+                id="longBreakTime"
+                type="number"
+                min="1"
+                max="60"
+                className="col-span-3"
+                value={formatMinutes(tempSettings.longBreak)}
+                onChange={(e) => handleSettingChange('longBreak', e.target.value)}
+              />
+            </div>
+            
+            <div className="text-sm text-muted-foreground mt-2">
+              All times are in minutes.
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsOpen(false)}>Cancel</Button>
+            <Button onClick={saveSettings}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Collapsible>
   );
 };
