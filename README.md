@@ -6,13 +6,13 @@
 
 ## Development Process
 
-This project was a test for a AI-assisted worflow :
+This project was a test for an AI-assisted worflow :
 
 - Initial concept created in [Lovable](https://lovable.dev/)
 - Implementation of features using [Trae](https://www.trae.ai/) AI with Claude 3.7
 - Manual adjustments for responsiveness and UI refinements
 - Code optimization to remove unnecessary props and improve performance
-- Deployed and tested on Netlify
+- Deployed and hosted by Netlify
 
 ## Features
 
